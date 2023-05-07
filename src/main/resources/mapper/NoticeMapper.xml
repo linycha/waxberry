@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tencent.wxcloudrun.modules.dao.NoticeMapper">
+  <resultMap id="BaseResultMap" type="com.tencent.wxcloudrun.modules.entity.Notice">
+    <!--@mbg.generated-->
+    <!--@Table notice-->
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="title" jdbcType="VARCHAR" property="title" />
+    <result column="content" jdbcType="VARCHAR" property="content" />
+    <result column="is_top" jdbcType="TINYINT" property="isTop" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+    <result column="del_flag" jdbcType="BOOLEAN" property="delFlag" />
+    <result column="sorts" jdbcType="INTEGER" property="sorts" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--@mbg.generated-->
+    id, title, content, is_top, create_time, update_time, del_flag, sorts
+  </sql>
+
+  <select id="selectPage" resultType="com.tencent.wxcloudrun.modules.entity.Notice">
+    select id, title, content, is_top, create_time, update_time, del_flag, sorts
+    from notice n
+    where del_flag = 0
+    <if test="dto.title != null and dto.title != ''">
+      and title like "%" #{dto.title} "%"
+    </if>
+    <if test="dto.content != null and dto.content != ''">
+      and content like "%" #{dto.content} "%"
+    </if>
+    order by sorts, create_time
+    </select>
+</mapper>

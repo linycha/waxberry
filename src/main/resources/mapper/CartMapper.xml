@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tencent.wxcloudrun.modules.dao.CartMapper">
+  <resultMap id="BaseResultMap" type="com.tencent.wxcloudrun.modules.entity.Cart">
+    <!--@mbg.generated-->
+    <!--@Table cart-->
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="user_id" jdbcType="INTEGER" property="userId" />
+    <result column="product_id" jdbcType="INTEGER" property="productId" />
+    <result column="num" jdbcType="INTEGER" property="num" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--@mbg.generated-->
+    id, user_id, product_id, num, create_time
+  </sql>
+
+  <select id="selectPage" resultType="com.tencent.wxcloudrun.modules.dto.CartDTO">
+    select     c.id, c.user_id, c.product_id, c.num, c.create_time,
+    p.name productName, p.sell_price,p.logo_img,p.shop_id
+    from cart c
+    left join product p on p.id = c.product_id
+    where p.del_flag = 0
+    <if test="dto.name != null and dto.name != ''">
+      and p.`name` like "%" #{dto.name} "%"
+    </if>
+    <if test="dto.userId != null">
+      and c.user_id = #{dto.userId}
+    </if>
+    order by c.create_time desc
+  </select>
+
+  <delete id="addCartNum">
+    update cart set num = (num+1)
+    where user_id = #{userId} and product_id = #{productId}
+  </delete>
+
+  <delete id="minusCartNum">
+    update cart set num = (num-1)
+    where user_id = #{userId} and product_id = #{productId}
+  </delete>
+
+  <delete id="updateNum">
+    update cart set num = #{num}
+    where id =#{id}
+  </delete>
+</mapper>

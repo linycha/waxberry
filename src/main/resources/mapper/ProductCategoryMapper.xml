@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tencent.wxcloudrun.modules.dao.ProductCategoryMapper">
+  <resultMap id="BaseResultMap" type="com.tencent.wxcloudrun.modules.entity.ProductCategory">
+    <!--@mbg.generated-->
+    <!--@Table product_category-->
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="parent_id" jdbcType="INTEGER" property="parentId" />
+    <result column="name" jdbcType="VARCHAR" property="name" />
+    <result column="status" jdbcType="CHAR" property="status" />
+    <result column="sort" jdbcType="INTEGER" property="sort" />
+    <result column="del_flag" jdbcType="BOOLEAN" property="delFlag" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+    <result column="remark" jdbcType="VARCHAR" property="remark" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--@mbg.generated-->
+    id, parent_id, `name`, `status`, sort, del_flag, create_time, update_time, remark
+  </sql>
+  <select id="selectPage" resultType="com.tencent.wxcloudrun.modules.entity.ProductCategory">
+    select id, parent_id, `name`, `status`, sort, del_flag, create_time, update_time,remark
+    from product_category
+    where del_flag = 0
+    <if test="dto.name != null and dto.name != ''">
+      and `name` like "%" #{dto.name} "%"
+    </if>
+    order by create_time desc
+  </select>
+</mapper>

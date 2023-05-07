@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tencent.wxcloudrun.modules.dao.OrderMapper">
+  <resultMap id="BaseResultMap" type="com.tencent.wxcloudrun.modules.entity.Order">
+    <!--@mbg.generated-->
+    <!--@Table `order`-->
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="order_no" jdbcType="BIGINT" property="orderNo" />
+    <result column="user_id" jdbcType="INTEGER" property="userId" />
+    <result column="shipping_id" jdbcType="INTEGER" property="shippingId" />
+    <result column="shop_id" jdbcType="INTEGER" property="shopId" />
+    <result column="box_cost" jdbcType="DECIMAL" property="boxCost" />
+    <result column="send_cost" jdbcType="DECIMAL" property="sendCost" />
+    <result column="total_price" jdbcType="DECIMAL" property="totalPrice" />
+    <result column="pay_money" jdbcType="DECIMAL" property="payMoney" />
+    <result column="pay_type" jdbcType="VARCHAR" property="payType" />
+    <result column="remark" jdbcType="VARCHAR" property="remark" />
+    <result column="complete_time" jdbcType="TIMESTAMP" property="completeTime" />
+    <result column="status" jdbcType="VARCHAR" property="status" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+    <result column="shipping_method" jdbcType="VARCHAR" property="shippingMethod" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--@mbg.generated-->
+    id, order_no, user_id, shipping_id, shop_id, box_cost, send_cost, total_money, pay_money, 
+    pay_type, remark, complete_time, `status`, create_time, update_time, shipping_method
+  </sql>
+
+  <select id="selectPage" resultMap="OrderMap">
+    select o.id, o.order_no, o.user_id, o.shipping_id, o.shop_id, o.total_price, o.pay_money,o.shipping_method,
+    o.pay_type, o.remark, o.complete_time, o.`status`, o.create_time,i.order_no itemOrderNo,o.shipping_address,o.shipping_name,
+    i.sell_price sellPrice,i.num,p.name productName,p.id productId,y.username,o.back_address,p.logo_img logoImg
+    from `order` o
+    left join order_item i on o.order_no = i.order_no
+    left join product p on p.id = i.product_id
+    left join shipping h on h.id = o.shipping_id
+    left join sys_user y on y.id = o.user_id
+    where 1=1
+    <if test="dto.userId != null">
+      and o.user_id = #{dto.userId}
+    </if>
+    <if test="dto.status != null and dto.status != ''">
+      and o.`status` = #{dto.status}
+    </if>
+    <if test="dto.orderNo != null and dto.orderNo != ''">
+      and o.order_no = #{dto.orderNo}
+    </if>
+    order by o.create_time desc
+  </select>
+
+  <update id="updateStatusByOrderNo">
+    update `order` set `status` = #{status} where order_no = #{orderNo}
+    </update>
+  <resultMap id="OrderMap" type="com.tencent.wxcloudrun.modules.dto.OrderInfoDTO">
+    <id column="id" property="id" />
+    <result column="user_id" javaType="java.lang.String" jdbcType="VARCHAR" property="userId" />
+    <result column="shipping_id"  property="shippingId" />
+    <result column="shipping_method" jdbcType="VARCHAR" property="shippingMethod" />
+    <result column="order_no" javaType="java.lang.String" jdbcType="VARCHAR" property="orderNo" />
+    <result column="username" javaType="java.lang.String" jdbcType="VARCHAR" property="username" />
+    <result column="back_address" javaType="java.lang.String" jdbcType="VARCHAR" property="backAddress" />
+    <result column="shipping_address" javaType="java.lang.String" jdbcType="VARCHAR" property="shippingAddress" />
+    <result column="shipping_name" javaType="java.lang.String" jdbcType="VARCHAR" property="shippingName" />
+    <result column="remark" javaType="java.lang.String" jdbcType="VARCHAR" property="remark" />
+    <result column="pay_type" javaType="java.lang.String" jdbcType="VARCHAR" property="payType" />
+    <result column="complete_time" javaType="java.lang.String" jdbcType="VARCHAR" property="completeTime" />
+    <result column="status" jdbcType="VARCHAR" javaType="java.lang.String" property="status" />
+    <result column="total_price" jdbcType="DECIMAL" javaType="java.math.BigDecimal" property="totalPrice" />
+    <result column="pay_money" jdbcType="DECIMAL" javaType="java.math.BigDecimal" property="payMoney" />
+    <result column="create_time" jdbcType="TIMESTAMP" javaType="java.util.Date" property="createTime"  />
+    <collection property="itemList" ofType="com.tencent.wxcloudrun.modules.entity.OrderItem" resultMap="OrderItemMap" column="order_no"/>
+  </resultMap>
+  <resultMap id="OrderItemMap" type="com.tencent.wxcloudrun.modules.entity.OrderItem">
+    <result column="productName" property="productName"/>
+    <result column="logoImg" property="logoImg"/>
+    <result column="num" property="num"/>
+    <result column="productId" property="productId"/>
+  </resultMap>
+
+  <select id="selectStatusCount" resultType="com.tencent.wxcloudrun.modules.dto.OrderStatusCountDTO">
+    select (select count(*) from `order` where user_id = #{userId} and status = '1') unPayCount,
+    (select count(*) from `order` where user_id = #{userId} and status = '2') unDeliveryCount
+  </select>
+</mapper>

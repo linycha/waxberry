@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tencent.wxcloudrun.modules.dao.UserMapper">
+  <resultMap id="BaseResultMap" type="com.tencent.wxcloudrun.modules.entity.User">
+    <constructor>
+      <idArg column="id" jdbcType="INTEGER"/>
+      <arg column="username" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <arg column="password" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <arg column="sex" javaType="java.lang.Integer" jdbcType="CHAR" />
+      <arg column="mobile" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <arg column="avatar" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <arg column="create_time" javaType="java.util.Date" jdbcType="TIMESTAMP" />
+      <arg column="update_time" javaType="java.util.Date" jdbcType="TIMESTAMP" />
+    </constructor>
+  </resultMap>
+  <sql id="Base_Column_List">
+    id, username, password, sex, mobile, avatar, status, create_time,
+    update_time
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="integer" resultType="com.tencent.wxcloudrun.modules.entity.User">
+    select id, username, mobile, avatar, password
+    from sys_user
+    where user_id = #{id,jdbcType=VARCHAR}
+  </select>
+  <insert id="insertSelective" parameterType="com.tencent.wxcloudrun.modules.entity.User" useGeneratedKeys="true" keyProperty="id">
+    insert into sys_user
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="username != null">
+        username,
+      </if>
+      <if test="password != null">
+        password,
+      </if>
+      <if test="sex != null">
+        sex,
+      </if>
+      <if test="mobile != null">
+        mobile,
+      </if>
+      <if test="avatar != null">
+        avatar
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="username != null">
+        #{username,jdbcType=VARCHAR},
+      </if>
+      <if test="password != null">
+        #{password,jdbcType=VARCHAR},
+      </if>
+      <if test="sex != null">
+        #{sex},
+      </if>
+      <if test="mobile != null">
+        #{mobile,jdbcType=VARCHAR},
+      </if>
+      <if test="avatar != null">
+        #{avatar,jdbcType=VARCHAR}
+      </if>
+    </trim>
+  </insert>
+  <insert id="insertRole" parameterType="map">
+    insert into sys_user_role values (#{userId},#{roleId})
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.tencent.wxcloudrun.modules.entity.User">
+    update sys_user
+    <set>
+      <if test="username != null">
+        username = #{username,jdbcType=VARCHAR},
+      </if>
+      <if test="password != null">
+        password = #{password,jdbcType=VARCHAR},
+      </if>
+      <if test="sex != null">
+        sex = #{sex},
+      </if>
+      <if test="mobile != null">
+        mobile = #{mobile,jdbcType=VARCHAR},
+      </if>
+      <if test="avatar != null">
+        avatar = #{avatar,jdbcType=VARCHAR}
+      </if>
+      <if test="status != null">
+        status = #{status}
+      </if>
+    </set>
+    where id = #{id}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.tencent.wxcloudrun.modules.entity.User">
+    update sys_user
+    set
+      username = #{username,jdbcType=VARCHAR},
+      password = #{password,jdbcType=VARCHAR},
+      sex = #{sex},
+      mobile = #{mobile,jdbcType=VARCHAR},
+      avatar = #{avatar,jdbcType=VARCHAR},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      update_time = now()
+    where id = #{id,jdbcType=VARCHAR}
+  </update>
+  <select id="checkUsername" parameterType="String" resultType="int">
+    select count(1) from sys_user
+    where username = #{username}
+  </select>
+  <select id="checkMobile" parameterType="String" resultType="int">
+    select count(1) from sys_user
+    where mobile = #{mobile}
+  </select>
+  <select id="selectLogin" parameterType="map" resultType="com.tencent.wxcloudrun.modules.entity.User">
+    select
+    <include refid="Base_Column_List"/>
+    from sys_user where
+    username=#{username} and password=#{password}
+  </select>
+  <update id="updatePasswordByUsername" parameterType="map">
+    update sys_user set
+    password = #{password},update_time = now()
+    where username = #{username}
+  </update>
+  <select id="checkPassword" resultType="int" parameterType="map">
+    select count(1) from mmall_user
+    where password = #{password}
+    and id = #{userId}
+  </select>
+  <select id="selectByUsernameOrUserId" parameterType="map" resultMap="UserRolePermissionMap">
+    select s.id,s.username,s.password,s.status as status,s.mobile,s.sex,s.avatar,
+    r.id as rid, r.name as rname,s.user_id,s.open_id
+    from sys_user s
+    left join sys_user_role ur on ur.user_id = s.id
+    left join sys_role r on r.id = ur.role_id
+    where 1=1
+    <if test="username != null and username != ''">
+      and s.username=#{username}
+    </if>
+    <if test="userId != null and userId != ''">
+      and s.user_id = #{userId}
+    </if>
+  </select>
+  <select id="selectByMobile" parameterType="map" resultMap="UserRolePermissionMap">
+    select s.id,s.username,s.password,s.status as status,s.mobile,s.sex,s.avatar,
+    r.id as rid, r.name as rname,s.user_id,s.open_id
+    from sys_user s
+    left join sys_user_role ur on ur.user_id = s.user_id
+    left join sys_role r on r.id = ur.role_id
+    where 1=1 and s.mobile = #{mobile}
+  </select>
+
+  <select id="selectUsernameByMobile" parameterType="String" resultType="String">
+    select username from sys_user
+    where mobile=#{mobile}
+  </select>
+
+  <select id="selectRoleByUserId" parameterType="String" resultType="com.tencent.wxcloudrun.modules.entity.Role">
+    select r.id, r.name
+    from sys_user s
+    left join sys_user_role ur on ur.user_id = s.id
+    left join sys_role r on r.id = ur.role_id
+    where s.id=#{userId}
+  </select>
+  <resultMap id="UserRolePermissionMap" type="com.tencent.wxcloudrun.modules.entity.User">
+    <id column="id" javaType="java.lang.Integer" property="id" />
+    <result column="username" javaType="java.lang.String" jdbcType="VARCHAR" property="username" />
+    <result column="user_id" javaType="java.lang.String" jdbcType="VARCHAR" property="userId" />
+    <result column="open_id" javaType="java.lang.String" jdbcType="VARCHAR" property="openId" />
+    <result column="password" javaType="java.lang.String" jdbcType="VARCHAR" property="password" />
+    <result column="sex" javaType="java.lang.Integer" property="sex"/>
+    <result column="mobile" javaType="java.lang.String" jdbcType="VARCHAR" property="mobile"/>
+    <result column="avatar" javaType="java.lang.String" jdbcType="VARCHAR" property="avatar"/>
+    <result column="status" property="status" />
+    <association property="roleList" javaType="com.tencent.wxcloudrun.modules.entity.Role" resultMap="RoleMap" column="id"/>
+
+  </resultMap>
+  <resultMap id="RoleMap" type="com.tencent.wxcloudrun.modules.entity.Role">
+    <id column="rid" property="id" />
+    <result column="rname" property="name"/>
+  </resultMap>
+
+  <select id="selectPage" resultType="com.tencent.wxcloudrun.modules.entity.User">
+    select s.id, s.username, s.password, s.sex, s.mobile, s.create_time,
+    r.remarks roleName,s.status,s.open_id
+    from sys_user s
+    left join sys_user_role ur on ur.user_id = s.id
+    left join sys_role r on r.id = ur.role_id
+    where r.id = 1
+    <if test="dto.name != null and dto.name != ''">
+      and s.username like "%" #{dto.name} "%"
+    </if>
+    </select>
+  <update id="updateRole">
+    update sys_user_role set role_id = #{roleId}
+    where user_id = #{userId}
+  </update>
+</mapper>
