@@ -36,6 +36,7 @@ public class CartController {
      */
     @GetMapping("list")
     public Res<IPage<CartDTO>> selectList(QueryDTO dto) {
+
         dto.setUserId(UserUtils.getUserId());
         return Res.success(cartService.selectPage(dto));
     }
