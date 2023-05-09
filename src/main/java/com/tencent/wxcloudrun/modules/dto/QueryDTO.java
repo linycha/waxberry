@@ -16,6 +16,7 @@ public class QueryDTO extends BaseDTO {
     private String title;
 
     private String name;
+    private String code;
 
     private String content;
 

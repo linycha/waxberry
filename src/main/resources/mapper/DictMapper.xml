@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tencent.wxcloudrun.modules.dao.DictMapper">
+  <resultMap id="BaseResultMap" type="com.tencent.wxcloudrun.modules.entity.Dict">
+    <!--@mbg.generated-->
+    <!--@Table dict-->
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="code" jdbcType="VARCHAR" property="code" />
+    <result column="value_one" jdbcType="VARCHAR" property="valueOne" />
+    <result column="value_two" jdbcType="VARCHAR" property="valueTwo" />
+    <result column="value_three" jdbcType="VARCHAR" property="valueThree" />
+    <result column="value_four" jdbcType="VARCHAR" property="valueFour" />
+    <result column="value_five" jdbcType="VARCHAR" property="valueFive" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+    <result column="del_flag" jdbcType="BOOLEAN" property="delFlag" />
+    <result column="remark" jdbcType="VARCHAR" property="remark" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--@mbg.generated-->
+    id, code, value_one, value_two, value_three, value_four, value_five, create_time, 
+    update_time, del_flag, remark
+  </sql>
+
+  <select id="selectPage" resultMap="BaseResultMap">
+    select id, code, value_one, value_two, value_three, value_four, value_five, create_time,
+           update_time, del_flag, remark
+    from dict
+    where del_flag = 0
+    <if test="dto.code != null and dto.code != ''">
+      and code like "%" #{dto.code} "%"
+    </if>
+    order by create_time desc
+    </select>
+</mapper>
