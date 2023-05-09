@@ -32,7 +32,7 @@ public class ShiroConfig {
         ShiroFilterFactoryBean bean = new ShiroFilterFactoryBean();
         bean.setSecurityManager(securityManager());
         //没有登录时跳转的url
-        bean.setLoginUrl("/to_login");
+        //bean.setLoginUrl("/to_login");
         //bean.setSuccessUrl("/login");
         //没有权限访问某个页面的时候跳转的url
         bean.setUnauthorizedUrl("/unauthc");
