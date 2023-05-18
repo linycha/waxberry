@@ -5,10 +5,13 @@ import cn.binarywang.wx.miniapp.bean.WxMaJscode2SessionResult;
 import cn.binarywang.wx.miniapp.bean.WxMaPhoneNumberInfo;
 import cn.binarywang.wx.miniapp.bean.WxMaUserInfo;
 import cn.binarywang.wx.miniapp.util.WxMaConfigHolder;
+import cn.hutool.core.net.Ipv4Util;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.extra.servlet.ServletUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.tencent.wxcloudrun.common.Const;
 import com.tencent.wxcloudrun.modules.dto.WxSessionDTO;
+import com.tencent.wxcloudrun.modules.entity.LoginRecord;
 import com.tencent.wxcloudrun.modules.entity.User;
 import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.common.error.WxErrorException;
@@ -18,6 +21,7 @@ import org.apache.shiro.subject.Subject;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 
 @Service
 @Slf4j
@@ -29,11 +33,14 @@ public class WechatLoginService {
     @Resource
     private UserServiceImpl userService;
 
+    @Resource
+    private LoginRecordService loginRecordService;
+
     /**
      * 登录获取openId和sessionKey，未注册返回空，已注册自动登录并返回token
      * @param code code
      */
-    public String login(String code) throws WxErrorException {
+    public String login(String code, HttpServletRequest request) throws WxErrorException {
         if(StrUtil.isBlank(code)) {
             log.error("微信小程序登录获取openId和sessionKey: code不能为空");
             throw new IllegalArgumentException("code不能为空");
@@ -42,9 +49,16 @@ public class WechatLoginService {
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("open_id", result.getOpenid());
         User user = userService.getOne(queryWrapper);
+
+        String ipAddress = ServletUtil.getClientIP(request, "");
         if(user == null){
+            loginRecordService.save(LoginRecord.builder().openId(result.getOpenid())
+                    .ipAddress(ipAddress).remark("未注册").build());
             return "";
         }else {
+            String mobile = StrUtil.isNotBlank(user.getMobile()) ? user.getMobile() : "";
+            loginRecordService.save(LoginRecord.builder().openId(result.getOpenid())
+                    .ipAddress(ipAddress).userId(user.getUserId()).remark("登录").mobile(mobile).build());
             return shiroLogin(user);
         }
     }
@@ -68,7 +82,7 @@ public class WechatLoginService {
         return user;
     }
 
-    public String loginByPhone(WxSessionDTO dto) throws WxErrorException {
+    public String loginByPhone(WxSessionDTO dto, HttpServletRequest request) throws WxErrorException {
         log.info("微信小程序---开始手机号认证登录:"+dto.getUserId());
         if(StrUtil.isBlank(dto.getOpenIdCode()) || StrUtil.isBlank(dto.getPhoneCode())) {
             log.error("微信小程序---开始手机号认证登录: code不能为空");
@@ -88,7 +102,9 @@ public class WechatLoginService {
                 // 修改保存手机号
                 user.setMobile(phoneNoInfo.getPurePhoneNumber());
                 userService.updateById(user);
-
+                String ipAddress = ServletUtil.getClientIP(request, "");
+                loginRecordService.save(LoginRecord.builder().remark("授权登录")
+                        .ipAddress(ipAddress).userId(user.getUserId()).mobile(phoneNoInfo.getPurePhoneNumber()).build());
                 //shiro登录获取token
                 return shiroLogin(user);
             }else {

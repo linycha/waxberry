@@ -29,17 +29,16 @@ public class WechatLoginController {
      */
     @GetMapping("login")
     @ApiOperation("获取openId并登录，返回token，未注册返回空")
-    public Res<String> login(String code) throws WxErrorException {
-        return Res.success(wechatLoginService.login(code));
+    public Res<String> login(String code,HttpServletRequest request) throws WxErrorException {
+        return Res.success(wechatLoginService.login(code,request));
     }
 
     @GetMapping("loginByPhone")
     @ApiOperation("获取用户手机号，并认证登录")
     public Res<String> loginByPhone(WxSessionDTO dto, HttpServletRequest request) throws WxErrorException {
-        System.out.println(request);
 /*        String token = WebUtils.toHttp(request).getHeader("aaaacl-token");
         dto.setUserId(token);*/
-        return Res.success(wechatLoginService.loginByPhone(dto));
+        return Res.success(wechatLoginService.loginByPhone(dto,request));
     }
 
     @PostMapping("getUserInfo")
